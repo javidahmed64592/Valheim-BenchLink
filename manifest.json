@@ -1,0 +1,10 @@
+{
+  "name": "BenchLink",
+  "description": "Link nearby crafting stations so one of each bench covers your whole base.",
+  "version_number": "0.1.0",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351",
+    "ValheimModding-Jotunn-2.30.2"
+  ],
+  "website_url": "https://github.com/javidahmed64592/Valheim-BenchLink"
+}
