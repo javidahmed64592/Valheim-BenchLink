@@ -61,6 +61,27 @@ internal static class StationClusters
         return index < 0 ? null : StationList[index];
     }
 
+    /// <summary>
+    /// Swaps a duplicate station for the linked station of the same type that also covers the point, if there is one.
+    /// </summary>
+    public static CraftingStation PreferLinked(CraftingStation found, Vector3 point)
+    {
+        Refresh();
+        if (!_graph.HasDuplicates)
+        {
+            return found;
+        }
+
+        int index = StationList.IndexOf(found);
+        if (index < 0 || !_graph.IsDuplicate(index))
+        {
+            return found;
+        }
+
+        int primary = _graph.FindPrimaryCovering(point.x, point.z, _graph[index].Type);
+        return primary < 0 ? found : StationList[primary];
+    }
+
     /// <summary>The station's position in <see cref="Graph"/>, or -1 if it is not loaded.</summary>
     public static int IndexOf(CraftingStation station)
     {

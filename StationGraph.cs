@@ -51,6 +51,45 @@ internal sealed class StationGraph
         return _duplicate[index];
     }
 
+    public bool HasDuplicates
+    {
+        get
+        {
+            foreach (bool duplicate in _duplicate)
+            {
+                if (duplicate)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    /// <summary>The nearest station of the type that is not a duplicate and covers the point itself, or -1.</summary>
+    public int FindPrimaryCovering(float x, float z, int type)
+    {
+        int best = -1;
+        float bestDistance = float.MaxValue;
+        for (int i = 0; i < _nodes.Length; i++)
+        {
+            if (_nodes[i].Type != type || _duplicate[i] || !Covers(i, x, z))
+            {
+                continue;
+            }
+
+            float distance = Distance(_nodes[i].X, _nodes[i].Z, x, z);
+            if (distance < bestDistance)
+            {
+                best = i;
+                bestDistance = distance;
+            }
+        }
+
+        return best;
+    }
+
     public int ClusterSize(int cluster)
     {
         int size = 0;

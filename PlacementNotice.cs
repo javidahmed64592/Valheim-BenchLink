@@ -12,12 +12,18 @@ namespace BenchLink;
 internal static class PlacementNotice
 {
     private const float PlacementWindow = 1f;
+    private const float HoldSeconds = 5f;
+    private const float FadeSeconds = 1.5f;
 
     private static float _placedAt = float.NegativeInfinity;
     private static CraftingStation _justPlaced;
+    private static float _fadeAt = float.PositiveInfinity;
+    private static string _shownText;
 
     public static void Tick()
     {
+        FadeWhenDue();
+
         if (_justPlaced == null)
         {
             return;
@@ -33,9 +39,48 @@ internal static class PlacementNotice
             return;
         }
 
-        string name = Localization.instance.Localize(station.m_name);
-        player.Message(MessageHud.MessageType.Center,
-            "This " + name + " is not linked: the cluster it is in already has one, so it will not extend it.");
+        Show("Duplicate " + Localization.instance.Localize(station.m_name) + ": it won't extend the cluster");
+    }
+
+    /// <summary>
+    /// Vanilla starts fading a centre message at once and takes 4 s, which is too quick to read, so drop
+    /// that fade and run our own after a hold.
+    /// </summary>
+    private static void Show(string text)
+    {
+        MessageHud hud = MessageHud.instance;
+        if (hud == null)
+        {
+            return;
+        }
+
+        int before = hud._crossFadeTextBuffer.Count;
+        hud.ShowMessage(MessageHud.MessageType.Center, text);
+        if (hud._crossFadeTextBuffer.Count != before + 2)
+        {
+            return;
+        }
+
+        hud._crossFadeTextBuffer.RemoveAt(before + 1);
+        _shownText = hud.m_messageCenterText.text;
+        _fadeAt = Time.unscaledTime + HoldSeconds;
+    }
+
+    private static void FadeWhenDue()
+    {
+        if (Time.unscaledTime < _fadeAt)
+        {
+            return;
+        }
+
+        _fadeAt = float.PositiveInfinity;
+        MessageHud hud = MessageHud.instance;
+
+        // Another centre message may have replaced ours; it has its own fade.
+        if (hud != null && hud.m_messageCenterText.text == _shownText)
+        {
+            hud.m_messageCenterText.CrossFadeAlpha(0f, FadeSeconds, ignoreTimeScale: true);
+        }
     }
 
     internal static void Placed(Piece piece)

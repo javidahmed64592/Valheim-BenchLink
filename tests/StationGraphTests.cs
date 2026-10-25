@@ -191,6 +191,17 @@ public class StationGraphTests
     }
 
     [Fact]
+    public void FindPrimaryCoveringSkipsDuplicates()
+    {
+        var graph = new StationGraph(
+            [Station(0, 36, Workbench), Station(30, 38, Forge), Station(60, 40, Workbench)], 0f);
+
+        Assert.True(graph.HasDuplicates);
+        Assert.Equal(2, graph.FindPrimaryCovering(30f, 0f, Workbench));
+        Assert.Equal(-1, graph.FindPrimaryCovering(-30f, 0f, Workbench));
+    }
+
+    [Fact]
     public void ResultDoesNotDependOnStationOrder()
     {
         StationNode[] stations = [Station(0, 36, Workbench), Station(30, 38, Forge), Station(60, 36, Workbench)];
