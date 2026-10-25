@@ -6,7 +6,9 @@ namespace BenchLink;
 
 /// <summary>
 /// While building, shows the game's own bench rings for every station in the cluster of each bench
-/// the player is in range of, and tints the rings of linked stations Ember Gold. It borrows each station's
+/// the player is in range of, and tints the rings of linked stations Ember Gold. The station the player is
+/// looking at is always shown, tinted the same blue as the game's piece highlight, so its own range stands out
+/// from the rest of its cluster. It borrows each station's
 /// existing ring rather than creating any, so there is nothing to pool or leak: rings are switched off again
 /// when the hammer is put away, the indicator is turned off, or the station unloads.
 /// </summary>
@@ -16,6 +18,7 @@ internal sealed class RangeIndicator
     private const float TickInterval = 0.25f;
 
     private static readonly Color LinkedTint = new(0.941f, 0.690f, 0.290f);
+    private static readonly Color HoverTint = new(0.6f, 0.8f, 1f);
     private static readonly string[] ColorProperties = ["_Color", "_TintColor", "_BaseColor"];
 
     private readonly List<CraftingStation> _shown = [];
@@ -52,7 +55,7 @@ internal sealed class RangeIndicator
             _cacheVersion = StationClusters.Version;
         }
 
-        Update(player.transform.position);
+        Update(player);
     }
 
     public void Hide()
@@ -66,8 +69,11 @@ internal sealed class RangeIndicator
         _tinted.Clear();
     }
 
-    private void Update(Vector3 playerPosition)
+    private void Update(Player player)
     {
+        Vector3 playerPosition = player.transform.position;
+        CraftingStation hovered = HoveredStation(player);
+
         StationGraph graph = StationClusters.Graph;
         IReadOnlyList<CraftingStation> stations = StationClusters.Stations;
 
@@ -96,8 +102,16 @@ internal sealed class RangeIndicator
             if (_clusterActive[cluster] && stations[i].m_areaMarker != null)
             {
                 _next.Add(stations[i]);
-                Show(stations[i], graph.ClusterSize(cluster) > 1);
+                Show(stations[i], graph.ClusterSize(cluster) > 1, stations[i] == hovered);
             }
+        }
+
+        if (hovered != null && hovered.m_areaMarker != null && !_next.Contains(hovered))
+        {
+            // Out of the cluster's reach, but the player is looking right at it.
+            _ = hovered.GetStationBuildRange();
+            _next.Add(hovered);
+            Show(hovered, false, true);
         }
 
         foreach (CraftingStation station in _shown)
@@ -112,16 +126,26 @@ internal sealed class RangeIndicator
         _shown.AddRange(_next);
     }
 
-    private void Show(CraftingStation station, bool linked)
+    private static CraftingStation HoveredStation(Player player)
+    {
+        Piece piece = player.GetHoveringPiece();
+        return piece == null ? null : piece.GetComponentInChildren<CraftingStation>();
+    }
+
+    private void Show(CraftingStation station, bool linked, bool hovered)
     {
         station.m_areaMarker.SetActive(true);
 
         // The hammer menu's own showing of the ring would switch it off half a second later.
         station.CancelInvoke("HideMarker");
 
-        if (linked)
+        if (hovered)
         {
-            Tint(station);
+            Tint(station, HoverTint);
+        }
+        else if (linked)
+        {
+            Tint(station, LinkedTint);
         }
         else
         {
@@ -143,7 +167,7 @@ internal sealed class RangeIndicator
         }
     }
 
-    private void Tint(CraftingStation station)
+    private void Tint(CraftingStation station, Color tint)
     {
         foreach (Renderer renderer in RenderersOf(station))
         {
@@ -156,7 +180,7 @@ internal sealed class RangeIndicator
             // Keep the ring's own transparency; only the hue changes.
             float alpha = renderer.sharedMaterial.GetColor(id).a;
             _block.Clear();
-            _block.SetColor(id, new Color(LinkedTint.r, LinkedTint.g, LinkedTint.b, alpha));
+            _block.SetColor(id, new Color(tint.r, tint.g, tint.b, alpha));
             renderer.SetPropertyBlock(_block);
         }
 

@@ -7,4 +7,5 @@
 - Placing a station that repeats a type in its cluster now shows a message saying it will not extend the cluster.
 - Added the `LinkSlack` and `Indicator` settings.
 - Added a build range indicator that shows the rings of linked stations while the Hammer is out.
+- The ring of the bench you are looking at turns blue, so its own range stands out from the rest of its cluster.
 - Added the `benchlink` console command to list nearby clusters.

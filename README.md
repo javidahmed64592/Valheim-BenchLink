@@ -40,7 +40,8 @@ To build a piece that needs a station, you must be inside the circle of **any** 
 
 While you have the Hammer out, BenchLink shows the build rings of every station in the cluster of each bench you are standing in range of.
 These are the game's own bench rings, so they look like vanilla.
-Rings of linked benches are tinted gold so you can see the cluster at a glance.
+Rings of linked benches are tinted gold so you can see the cluster at a glance, and rings of benches that are not linked stay white.
+Look at a bench with the Hammer and its own ring turns blue, linked or not, so you can see exactly how far that one bench reaches.
 
 ## Configuration
 
