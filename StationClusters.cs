@@ -16,6 +16,9 @@ internal static class StationClusters
     private static readonly Dictionary<string, int> TypeIds = [];
     private static readonly List<CraftingStation> StationList = [];
 
+    private static readonly Dictionary<int, bool> WasDuplicate = [];
+    private static readonly List<string> ChangedNames = [];
+
     private static StationGraph _graph;
     private static float _builtAt;
     private static float _builtSlack;
@@ -41,6 +44,12 @@ internal static class StationClusters
             Refresh();
             return _graph;
         }
+    }
+
+    /// <summary>Brings the cache up to date, which is also when changes in the linked stations are noticed.</summary>
+    public static void Poll()
+    {
+        Refresh();
     }
 
     public static void Invalidate()
@@ -89,6 +98,14 @@ internal static class StationClusters
         return StationList.IndexOf(station);
     }
 
+    /// <summary>The names of station types whose linked station changed near the player since this was last called.</summary>
+    public static bool TryTakeChanged(out string names)
+    {
+        names = string.Join(", ", ChangedNames);
+        ChangedNames.Clear();
+        return names.Length > 0;
+    }
+
     public static string NameOf(int type)
     {
         foreach (KeyValuePair<string, int> entry in TypeIds)
@@ -135,8 +152,38 @@ internal static class StationClusters
 
         _builtSlack = BenchLinkConfig.LinkSlack.Value;
         _graph = new StationGraph(nodes, _builtSlack);
+        RecordChanges();
         _builtAt = Time.time;
         _builtVersion = Version;
+    }
+
+    /// <summary>
+    /// Notes the stations whose place in their cluster changed since the last rebuild: one that was the linked
+    /// station of its type and no longer is, or the other way round. Stations seen for the first time are not
+    /// changes, and neither are stations out of the player's reach.
+    /// </summary>
+    private static void RecordChanges()
+    {
+        Player player = Player.m_localPlayer;
+        for (int i = 0; i < StationList.Count; i++)
+        {
+            bool duplicate = _graph.IsDuplicate(i);
+            if (player != null && WasDuplicate.TryGetValue(StationList[i].GetInstanceID(), out bool was) && was != duplicate)
+            {
+                Vector3 position = player.transform.position;
+                string name = StationList[i].m_name;
+                if (_graph.Covers(i, position.x, position.z) && !ChangedNames.Contains(name))
+                {
+                    ChangedNames.Add(name);
+                }
+            }
+        }
+
+        WasDuplicate.Clear();
+        for (int i = 0; i < StationList.Count; i++)
+        {
+            WasDuplicate[StationList[i].GetInstanceID()] = _graph.IsDuplicate(i);
+        }
     }
 
     /// <summary>Stations get ever-increasing ids as they are built, so a lower one was built earlier.</summary>

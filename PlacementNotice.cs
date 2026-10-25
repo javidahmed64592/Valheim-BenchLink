@@ -23,6 +23,12 @@ internal static class PlacementNotice
     public static void Tick()
     {
         FadeWhenDue();
+        StationClusters.Poll();
+
+        if (StationClusters.TryTakeChanged(out string changed))
+        {
+            Show("Cluster " + Localization.instance.Localize(changed) + " changed!");
+        }
 
         if (_justPlaced == null)
         {

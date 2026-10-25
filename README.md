@@ -4,62 +4,34 @@
 
 # BenchLink
 
-Link nearby crafting stations into clusters so any bench's range counts for every bench type in the cluster.
-
-In vanilla Valheim every crafting station only covers its own circle, and a piece that needs a Workbench can only be built inside a Workbench's circle.
-Big bases end up with duplicate benches just to reach the far corners.
-With BenchLink, benches whose ranges reach each other form a **linked cluster**, and inside a cluster every bench's circle counts for every bench type in that cluster.
-A Workbench and a Forge close enough to link now let you build Workbench pieces anywhere the Forge reaches, and Forge pieces anywhere the Workbench reaches.
+Link nearby crafting stations into clusters so one of each bench covers your whole base.
+Inside a cluster, every bench's build range counts for every bench type in it.
 
 ![Workbench and Forge](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_1.png)
 ![Stonecutter](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_2.png)
 
-## How Linking Works
+## How It Works
 
-Each station has a build range, which grows with its upgrades.
-Distances are measured on the ground, ignoring height, the same way vanilla does.
-Two stations are linked when the distance between them is less than the larger of their two ranges (plus `LinkSlack`).
-Links chain: if A links to B and B links to C, all three are one cluster, even if A and C are too far apart to link directly.
+Two stations link when they are closer than the larger of their build ranges, and links chain into clusters.
+Build anywhere inside the range of **any** station in a cluster to use every station type in it.
 
-A cluster holds **one station of each type**, so you cannot chain extra Workbenches outwards to stretch a cluster across the map.
-If a second station of a type would join a cluster that already has one, it is left out of the cluster and works like vanilla: it only covers its own circle, for its own type.
-When two stations of a type compete, the one with the larger range (the more upgraded one) takes the cluster's slot, and on equal range the one built first keeps it. Upgrading a spare bench can therefore change which one is linked.
-A station in range of two separate clusters joins the nearer one, unless it shares a type with it.
-When you place a station like this, a message tells you it will not extend the cluster.
-
-To build a piece that needs a station, you must be inside the circle of **any** station in a cluster that contains the needed station type.
-
-| Station | Build range |
-| ------- | ----------- |
-| Workbench | about 20 m, +4 m per upgrade (up to 36 m) |
-| Forge | about 20 m, +3 m per upgrade (up to 38 m) |
-| Stonecutter | about 20 m |
-| Artisan Table | about 40 m |
-| Black Forge, Galdr Table | up to about 35 m |
+A cluster holds **one station of each type**, so extra benches cannot be chained outwards.
+A second bench of a type is not linked and works like vanilla, and you get a message when you place one.
+The more upgraded bench keeps the cluster's slot, and on a tie the one built first does.
+You get a message whenever the cluster's bench changes.
 
 ## Range Indicator
 
-While you have the Hammer out, BenchLink shows the build rings of every station in the cluster of each bench you are standing in range of.
-These are the game's own bench rings, so they look like vanilla.
-Rings of linked benches are tinted gold so you can see the cluster at a glance, and rings of benches that are not linked stay white.
-Look at a bench with the Hammer and its own ring turns blue, linked or not, so you can see exactly how far that one bench reaches.
+With the Hammer out, the rings of nearby benches are shown: gold if linked, white if not.
+Look at a bench to turn its own ring blue.
 
 ## Configuration
 
 Settings are in the BepInEx config file `javidahmed64592.benchlink.cfg`.
+You can add extra metres to the link distance (`LinkSlack`) and turn the ring indicator off (`Indicator`).
 
-| Setting | Default | Description |
-| ------- | ------- | ----------- |
-| `LinkSlack` | `0` | Extra metres (0 to 20) added when deciding if two stations link. Raise it to link benches a little further apart. |
-| `Indicator` | `WhileBuilding` | `WhileBuilding` shows the rings above; `Off` removes them. |
-
-## Console Command
-
-`benchlink` prints the station clusters within 100 m of you: each member with its level, range and distance from you, which stations are linked and how far apart they are, and the area covered with and without linking.
-
-## Known Limits
-
-- Only loaded stations count. Stations in distant, unloaded zones are not part of any cluster until you get close.
+The `benchlink` console command lists nearby clusters.
+Only loaded stations count, and BenchLink only needs to be installed on your own game.
 
 ## License
 
