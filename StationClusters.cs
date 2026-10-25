@@ -61,6 +61,13 @@ internal static class StationClusters
         return index < 0 ? null : StationList[index];
     }
 
+    /// <summary>The station's position in <see cref="Graph"/>, or -1 if it is not loaded.</summary>
+    public static int IndexOf(CraftingStation station)
+    {
+        Refresh();
+        return StationList.IndexOf(station);
+    }
+
     public static string NameOf(int type)
     {
         foreach (KeyValuePair<string, int> entry in TypeIds)

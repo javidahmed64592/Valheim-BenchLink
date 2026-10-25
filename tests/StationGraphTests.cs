@@ -89,16 +89,6 @@ public class StationGraphTests
     }
 
     [Fact]
-    public void FindLinkedReturnsTheNearestStationOfTheType()
-    {
-        var graph = new StationGraph(
-            [Station(0, 36, Workbench), Station(30, 38, Forge), Station(60, 36, Workbench)], 0f);
-
-        Assert.Equal(2, graph.FindLinked(55f, 0f, Workbench));
-        Assert.Equal(0, graph.FindLinked(-10f, 0f, Workbench));
-    }
-
-    [Fact]
     public void FindLinkedFailsOutsideEveryCircleOrWithoutTheType()
     {
         var graph = new StationGraph([Station(0, 36, Workbench), Station(30, 38, Forge)], 0f);
@@ -114,5 +104,102 @@ public class StationGraphTests
         var graph = new StationGraph([Station(0, 36, Workbench), Station(200, 38, Forge)], 0f);
 
         Assert.Equal(-1, graph.FindLinked(10f, 0f, Forge));
+    }
+
+    [Fact]
+    public void FindLinkedReturnsTheNearestStationOfTheType()
+    {
+        // Two separate clusters, each with a workbench; the point is covered by both forges' clusters.
+        var graph = new StationGraph(
+            [Station(0, 36, Workbench), Station(30, 38, Forge), Station(100, 36, Workbench), Station(70, 38, Forge)], 0f);
+
+        Assert.Equal(2, graph.FindLinked(85f, 0f, Workbench));
+        Assert.Equal(0, graph.FindLinked(-10f, 0f, Workbench));
+    }
+
+    [Fact]
+    public void SecondStationOfATypeDoesNotJoinTheCluster()
+    {
+        // A second workbench at the edge of the first cluster would otherwise pull it 30 m further out.
+        var graph = new StationGraph(
+            [Station(0, 36, Workbench), Station(30, 38, Forge), Station(60, 36, Workbench)], 0f);
+
+        Assert.False(graph.IsDuplicate(0));
+        Assert.True(graph.IsDuplicate(2));
+        Assert.Equal(graph.ClusterOf(0), graph.ClusterOf(1));
+        Assert.NotEqual(graph.ClusterOf(0), graph.ClusterOf(2));
+        Assert.Equal(1, graph.ClusterSize(graph.ClusterOf(2)));
+    }
+
+    [Fact]
+    public void DuplicateStillWorksAsVanilla()
+    {
+        var graph = new StationGraph(
+            [Station(0, 36, Workbench), Station(30, 38, Forge), Station(60, 36, Workbench)], 0f);
+
+        // 90 m out is only in the duplicate workbench's own circle: it serves workbench pieces, not forge pieces.
+        Assert.Equal(2, graph.FindLinked(90f, 0f, Workbench));
+        Assert.Equal(-1, graph.FindLinked(90f, 0f, Forge));
+    }
+
+    [Fact]
+    public void ChainOfDuplicatesCannotExtendACluster()
+    {
+        var graph = new StationGraph(
+            [
+                Station(0, 36, Workbench),
+                Station(30, 38, Forge),
+                Station(60, 36, Workbench),
+                Station(90, 36, Workbench),
+                Station(120, 36, Workbench),
+            ],
+            0f);
+
+        // 100 m out is only reached by the far workbenches, which stand alone instead of lending the forge's reach.
+        Assert.Equal(-1, graph.FindLinked(100f, 0f, Forge));
+        Assert.Equal(2, graph.ClusterSize(graph.ClusterOf(0)));
+    }
+
+    [Fact]
+    public void HigherRangeDuplicateTakesTheSlot()
+    {
+        // The upgraded workbench (40 m) outranks the 36 m one, so it is the linked one.
+        var graph = new StationGraph([Station(0, 36, Workbench), Station(30, 38, Forge), Station(60, 40, Workbench)], 0f);
+
+        Assert.True(graph.IsDuplicate(0));
+        Assert.False(graph.IsDuplicate(2));
+        Assert.Equal(graph.ClusterOf(1), graph.ClusterOf(2));
+    }
+
+    [Fact]
+    public void StationThatWouldMergeTwoClustersWithTheSameTypeIsLeftOut()
+    {
+        // Two workbench + forge clusters, bridged by a stonecutter in range of both forges.
+        var graph = new StationGraph(
+            [
+                Station(0, 36, Workbench),
+                Station(30, 38, Forge),
+                Station(90, 38, Forge),
+                Station(120, 36, Workbench),
+                Station(60, 37, Stonecutter),
+            ],
+            0f);
+
+        Assert.True(graph.IsDuplicate(4));
+        Assert.Equal(3, graph.ClusterCount);
+        Assert.NotEqual(graph.ClusterOf(0), graph.ClusterOf(3));
+    }
+
+    [Fact]
+    public void ResultDoesNotDependOnStationOrder()
+    {
+        StationNode[] stations = [Station(0, 36, Workbench), Station(30, 38, Forge), Station(60, 36, Workbench)];
+        StationNode[] reversed = [stations[2], stations[1], stations[0]];
+
+        var forward = new StationGraph(stations, 0f);
+        var backward = new StationGraph(reversed, 0f);
+
+        Assert.Equal(forward.IsDuplicate(2), backward.IsDuplicate(0));
+        Assert.Equal(forward.IsDuplicate(0), backward.IsDuplicate(2));
     }
 }

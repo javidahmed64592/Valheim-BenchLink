@@ -21,6 +21,11 @@ Distances are measured on the ground, ignoring height, the same way vanilla does
 Two stations are linked when the distance between them is less than the larger of their two ranges (plus `LinkSlack`).
 Links chain: if A links to B and B links to C, all three are one cluster, even if A and C are too far apart to link directly.
 
+A cluster holds **one station of each type**, so you cannot chain extra Workbenches outwards to stretch a cluster across the map.
+If a second station of a type would join a cluster that already has one, it is left out of the cluster and works like vanilla: it only covers its own circle, for its own type.
+When two stations of a type compete, the one with the larger range (the more upgraded one) takes the cluster's slot, so upgrading a spare bench can change which one is linked.
+When you place a station like this, a message tells you it will not extend the cluster.
+
 To build a piece that needs a station, you must be inside the circle of **any** station in a cluster that contains the needed station type.
 
 | Station | Build range |

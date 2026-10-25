@@ -22,6 +22,7 @@ internal sealed class StationGraph
     private readonly StationNode[] _nodes;
     private readonly int[] _cluster;
     private readonly int[] _stamp;
+    private readonly bool[] _duplicate;
     private int _stampId;
 
     public StationGraph(StationNode[] nodes, float linkSlack)
@@ -29,6 +30,7 @@ internal sealed class StationGraph
         _nodes = nodes;
         _cluster = new int[nodes.Length];
         _stamp = new int[nodes.Length];
+        _duplicate = new bool[nodes.Length];
         ClusterCount = BuildClusters(linkSlack);
     }
 
@@ -41,6 +43,12 @@ internal sealed class StationGraph
     public int ClusterOf(int index)
     {
         return _cluster[index];
+    }
+
+    /// <summary>True if the station repeats a type already in the cluster it would join, so it is not linked.</summary>
+    public bool IsDuplicate(int index)
+    {
+        return _duplicate[index];
     }
 
     public int ClusterSize(int cluster)
@@ -259,7 +267,12 @@ internal sealed class StationGraph
         return types;
     }
 
-    /// <summary>Union-find over the link graph; returns the number of clusters.</summary>
+    /// <summary>
+    /// Union-find over the link graph; returns the number of clusters. A cluster holds at most one station
+    /// of each type, so stations are added strongest first (largest range, then by position so the result does
+    /// not depend on load order) and one whose type would then appear twice in a cluster is left out. It stays
+    /// a cluster of one and works like vanilla.
+    /// </summary>
     private int BuildClusters(float linkSlack)
     {
         int[] parent = new int[_nodes.Length];
@@ -268,14 +281,38 @@ internal sealed class StationGraph
             parent[i] = i;
         }
 
-        for (int i = 0; i < _nodes.Length; i++)
+        int[] order = new int[_nodes.Length];
+        for (int i = 0; i < order.Length; i++)
         {
-            for (int j = i + 1; j < _nodes.Length; j++)
+            order[i] = i;
+        }
+
+        Array.Sort(order, ComparePriority);
+
+        bool[] admitted = new bool[_nodes.Length];
+        int[] roots = new int[_nodes.Length];
+        foreach (int s in order)
+        {
+            int rootCount = 0;
+            for (int j = 0; j < _nodes.Length; j++)
             {
-                if (AreLinked(_nodes[i], _nodes[j], linkSlack))
+                int root = Find(parent, j);
+                if (admitted[j] && AreLinked(_nodes[s], _nodes[j], linkSlack) && Array.IndexOf(roots, root, 0, rootCount) < 0)
                 {
-                    parent[Find(parent, i)] = Find(parent, j);
+                    roots[rootCount++] = root;
                 }
+            }
+
+            if (HasDuplicateType(s, parent, admitted, roots, rootCount))
+            {
+                _duplicate[s] = true;
+                continue;
+            }
+
+            admitted[s] = true;
+            for (int r = 0; r < rootCount; r++)
+            {
+                parent[roots[r]] = s;
             }
         }
 
@@ -298,6 +335,48 @@ internal sealed class StationGraph
         }
 
         return clusters;
+    }
+
+    private int ComparePriority(int a, int b)
+    {
+        int byRange = _nodes[b].Range.CompareTo(_nodes[a].Range);
+        if (byRange != 0)
+        {
+            return byRange;
+        }
+
+        int byX = _nodes[a].X.CompareTo(_nodes[b].X);
+        if (byX != 0)
+        {
+            return byX;
+        }
+
+        int byZ = _nodes[a].Z.CompareTo(_nodes[b].Z);
+        return byZ != 0 ? byZ : a.CompareTo(b);
+    }
+
+    /// <summary>True if joining station s to the given clusters would put two stations of one type in a cluster.</summary>
+    private bool HasDuplicateType(int s, int[] parent, bool[] admitted, int[] roots, int rootCount)
+    {
+        int type = _nodes[s].Type;
+        int[] seen = new int[_nodes.Length];
+        int seenCount = 0;
+        for (int j = 0; j < _nodes.Length; j++)
+        {
+            if (!admitted[j] || Array.IndexOf(roots, Find(parent, j), 0, rootCount) < 0)
+            {
+                continue;
+            }
+
+            if (_nodes[j].Type == type || Array.IndexOf(seen, _nodes[j].Type, 0, seenCount) >= 0)
+            {
+                return true;
+            }
+
+            seen[seenCount++] = _nodes[j].Type;
+        }
+
+        return false;
     }
 
     private static int Find(int[] parent, int i)

@@ -27,9 +27,10 @@ internal static class HaveBuildStationInRangePatch
 [HarmonyPatch(typeof(CraftingStation), "Start")]
 internal static class StationStartPatch
 {
-    private static void Postfix()
+    private static void Postfix(CraftingStation __instance)
     {
         StationClusters.Invalidate();
+        PlacementNotice.Started(__instance);
     }
 }
 
