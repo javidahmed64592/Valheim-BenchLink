@@ -130,13 +130,20 @@ internal static class StationClusters
         {
             CraftingStation station = StationList[i];
             Vector3 position = station.transform.position;
-            nodes[i] = new StationNode(position.x, position.z, station.GetStationBuildRange(), TypeOf(station.m_name));
+            nodes[i] = new StationNode(position.x, position.z, station.GetStationBuildRange(), TypeOf(station.m_name), BuiltOrder(station));
         }
 
         _builtSlack = BenchLinkConfig.LinkSlack.Value;
         _graph = new StationGraph(nodes, _builtSlack);
         _builtAt = Time.time;
         _builtVersion = Version;
+    }
+
+    /// <summary>Stations get ever-increasing ids as they are built, so a lower one was built earlier.</summary>
+    private static long BuiltOrder(CraftingStation station)
+    {
+        ZNetView view = station.GetComponent<ZNetView>();
+        return view != null && view.IsValid() ? view.GetZDO().m_uid.ID : long.MaxValue;
     }
 
     private static int TypeOf(string name)

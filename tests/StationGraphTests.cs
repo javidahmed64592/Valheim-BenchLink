@@ -8,9 +8,9 @@ public class StationGraphTests
     private const int Forge = 1;
     private const int Stonecutter = 2;
 
-    private static StationNode Station(float x, float range, int type)
+    private static StationNode Station(float x, float range, int type, long order = 0)
     {
-        return new StationNode(x, 0f, range, type);
+        return new StationNode(x, 0f, range, type, order);
     }
 
     private static void AssertNear(double expected, double actual, double tolerance)
@@ -172,22 +172,44 @@ public class StationGraphTests
     }
 
     [Fact]
-    public void StationThatWouldMergeTwoClustersWithTheSameTypeIsLeftOut()
+    public void StationLinkingTwoClustersWithTheSameTypeJoinsTheNearest()
     {
-        // Two workbench + forge clusters, bridged by a stonecutter in range of both forges.
+        // Two workbench + forge clusters, with a stonecutter in range of both forges but nearer the first.
         var graph = new StationGraph(
             [
                 Station(0, 36, Workbench),
                 Station(30, 38, Forge),
                 Station(90, 38, Forge),
                 Station(120, 36, Workbench),
-                Station(60, 37, Stonecutter),
+                Station(55, 37, Stonecutter),
             ],
             0f);
 
-        Assert.True(graph.IsDuplicate(4));
-        Assert.Equal(3, graph.ClusterCount);
+        Assert.False(graph.IsDuplicate(4));
+        Assert.Equal(2, graph.ClusterCount);
+        Assert.Equal(graph.ClusterOf(1), graph.ClusterOf(4));
         Assert.NotEqual(graph.ClusterOf(0), graph.ClusterOf(3));
+    }
+
+    [Fact]
+    public void LaterStationOfAnExistingTypeIsADuplicate()
+    {
+        var graph = new StationGraph(
+            [Station(0, 36, Workbench), Station(30, 38, Forge), Station(60, 36, Workbench, 5)], 0f);
+
+        Assert.True(graph.IsDuplicate(2));
+    }
+
+    [Fact]
+    public void EarlierBuiltStationKeepsTheSlotOnEqualRange()
+    {
+        // The new workbench is further left, which used to let it win the tie.
+        var graph = new StationGraph(
+            [Station(-10, 36, Workbench, 9), Station(0, 36, Workbench, 1), Station(20, 38, Forge, 2)], 0f);
+
+        Assert.True(graph.IsDuplicate(0));
+        Assert.False(graph.IsDuplicate(1));
+        Assert.Equal(graph.ClusterOf(1), graph.ClusterOf(2));
     }
 
     [Fact]

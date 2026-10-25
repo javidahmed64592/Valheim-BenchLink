@@ -23,7 +23,8 @@ Links chain: if A links to B and B links to C, all three are one cluster, even i
 
 A cluster holds **one station of each type**, so you cannot chain extra Workbenches outwards to stretch a cluster across the map.
 If a second station of a type would join a cluster that already has one, it is left out of the cluster and works like vanilla: it only covers its own circle, for its own type.
-When two stations of a type compete, the one with the larger range (the more upgraded one) takes the cluster's slot, so upgrading a spare bench can change which one is linked.
+When two stations of a type compete, the one with the larger range (the more upgraded one) takes the cluster's slot, and on equal range the one built first keeps it. Upgrading a spare bench can therefore change which one is linked.
+A station in range of two separate clusters joins the nearer one, unless it shares a type with it.
 When you place a station like this, a message tells you it will not extend the cluster.
 
 To build a piece that needs a station, you must be inside the circle of **any** station in a cluster that contains the needed station type.
