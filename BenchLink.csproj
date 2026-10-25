@@ -3,11 +3,16 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>BenchLink</AssemblyName>
-    <Description>Link nearby crafting stations so one of each bench covers your whole base.</Description>
+    <Description>Link nearby crafting stations into clusters so any bench's range counts for every bench type in the cluster.</Description>
     <Version>0.1.0</Version>
     <LangVersion>latest</LangVersion>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The unit tests have their own project; keep them out of the mod build. -->
+    <Compile Remove="tests/**" />
+  </ItemGroup>
 
   <ItemGroup>
     <!-- Lets `dotnet build` target net472 on Linux without a Windows targeting pack. -->
@@ -39,12 +44,28 @@
       <HintPath>$(ManagedDir)/assembly_valheim.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="assembly_guiutils">
+      <HintPath>$(ManagedDir)/assembly_guiutils.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="BepInEx">
       <HintPath>$(BepInExCoreDir)/BepInEx.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Jotunn">
       <HintPath>$(BepInExPluginsDir)/ValheimModding-Jotunn/Jotunn.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="netstandard">
+      <HintPath>$(ManagedDir)/netstandard.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="SoftReferenceableAssets">
+      <HintPath>$(ManagedDir)/SoftReferenceableAssets.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Splatform">
+      <HintPath>$(ManagedDir)/Splatform.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine">

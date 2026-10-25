@@ -1,6 +1,6 @@
 {
   "name": "BenchLink",
-  "description": "Link nearby crafting stations so one of each bench covers your whole base.",
+  "description": "Link nearby crafting stations into clusters so any bench's range counts for every bench type in the cluster.",
   "version_number": "0.1.0",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2351",
