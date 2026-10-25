@@ -1,0 +1,43 @@
+using HarmonyLib;
+
+using UnityEngine;
+
+namespace BenchLink;
+
+/// <summary>
+/// Every build-range check for a piece's required station (placing, removing and the hammer menu's
+/// requirement list) goes through this method, so one postfix covers them all. Vanilla runs first and
+/// we only step in when it found nothing.
+/// </summary>
+[HarmonyPatch(typeof(CraftingStation), nameof(CraftingStation.HaveBuildStationInRange))]
+internal static class HaveBuildStationInRangePatch
+{
+    private static void Postfix(string name, Vector3 point, ref CraftingStation __result)
+    {
+        if (__result != null)
+        {
+            return;
+        }
+
+        __result = StationClusters.FindLinked(name, point);
+    }
+}
+
+/// <summary>Stations register themselves in Start, so the clusters change when one starts.</summary>
+[HarmonyPatch(typeof(CraftingStation), "Start")]
+internal static class StationStartPatch
+{
+    private static void Postfix()
+    {
+        StationClusters.Invalidate();
+    }
+}
+
+[HarmonyPatch(typeof(CraftingStation), "OnDestroy")]
+internal static class StationDestroyPatch
+{
+    private static void Postfix()
+    {
+        StationClusters.Invalidate();
+    }
+}
