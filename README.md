@@ -11,6 +11,9 @@ Big bases end up with duplicate benches just to reach the far corners.
 With BenchLink, benches whose ranges reach each other form a **linked cluster**, and inside a cluster every bench's circle counts for every bench type in that cluster.
 A Workbench and a Forge close enough to link now let you build Workbench pieces anywhere the Forge reaches, and Forge pieces anywhere the Workbench reaches.
 
+![Workbench and Forge](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_1.png)
+![Stonecutter](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_2.png)
+
 ## How Linking Works
 
 Each station has a build range, which grows with its upgrades.
