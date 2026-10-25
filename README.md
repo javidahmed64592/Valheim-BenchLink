@@ -4,7 +4,7 @@
 
 # BenchLink
 
-Link nearby crafting stations so one of each bench covers your whole base.
+Link nearby crafting stations into clusters so any bench's range counts for every bench type in the cluster.
 
 In vanilla Valheim every crafting station only covers its own circle, and a piece that needs a Workbench can only be built inside a Workbench's circle.
 Big bases end up with duplicate benches just to reach the far corners.
