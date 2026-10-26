@@ -3,7 +3,7 @@ using System;
 namespace BenchLink;
 
 /// <summary>A crafting station reduced to what the link maths needs, with no Unity types.</summary>
-internal readonly struct StationNode(float x, float z, float range, int type)
+internal readonly struct StationNode(float x, float z, float range, int type, long order = 0)
 {
     public float X { get; } = x;
     public float Z { get; } = z;
@@ -11,6 +11,9 @@ internal readonly struct StationNode(float x, float z, float range, int type)
 
     /// <summary>Identifies the kind of station (workbench, forge, ...); stations of one kind share an id.</summary>
     public int Type { get; } = type;
+
+    /// <summary>Lower means built earlier. Of two equally strong stations of one type, the earlier one is the linked one.</summary>
+    public long Order { get; } = order;
 }
 
 /// <summary>
@@ -22,6 +25,7 @@ internal sealed class StationGraph
     private readonly StationNode[] _nodes;
     private readonly int[] _cluster;
     private readonly int[] _stamp;
+    private readonly bool[] _duplicate;
     private int _stampId;
 
     public StationGraph(StationNode[] nodes, float linkSlack)
@@ -29,6 +33,7 @@ internal sealed class StationGraph
         _nodes = nodes;
         _cluster = new int[nodes.Length];
         _stamp = new int[nodes.Length];
+        _duplicate = new bool[nodes.Length];
         ClusterCount = BuildClusters(linkSlack);
     }
 
@@ -41,6 +46,51 @@ internal sealed class StationGraph
     public int ClusterOf(int index)
     {
         return _cluster[index];
+    }
+
+    /// <summary>True if the station repeats a type already in the cluster it would join, so it is not linked.</summary>
+    public bool IsDuplicate(int index)
+    {
+        return _duplicate[index];
+    }
+
+    public bool HasDuplicates
+    {
+        get
+        {
+            foreach (bool duplicate in _duplicate)
+            {
+                if (duplicate)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    /// <summary>The nearest station of the type that is not a duplicate and covers the point itself, or -1.</summary>
+    public int FindPrimaryCovering(float x, float z, int type)
+    {
+        int best = -1;
+        float bestDistance = float.MaxValue;
+        for (int i = 0; i < _nodes.Length; i++)
+        {
+            if (_nodes[i].Type != type || _duplicate[i] || !Covers(i, x, z))
+            {
+                continue;
+            }
+
+            float distance = Distance(_nodes[i].X, _nodes[i].Z, x, z);
+            if (distance < bestDistance)
+            {
+                best = i;
+                bestDistance = distance;
+            }
+        }
+
+        return best;
     }
 
     public int ClusterSize(int cluster)
@@ -259,7 +309,12 @@ internal sealed class StationGraph
         return types;
     }
 
-    /// <summary>Union-find over the link graph; returns the number of clusters.</summary>
+    /// <summary>
+    /// Union-find over the link graph; returns the number of clusters. A cluster holds at most one station
+    /// of each type, so stations are added strongest first (largest range, then earliest built) and each one
+    /// joins the nearest clusters it links to that it does not repeat a type with. A station that links to
+    /// clusters but cannot join any of them is a duplicate: it stays a cluster of one and works like vanilla.
+    /// </summary>
     private int BuildClusters(float linkSlack)
     {
         int[] parent = new int[_nodes.Length];
@@ -268,14 +323,32 @@ internal sealed class StationGraph
             parent[i] = i;
         }
 
-        for (int i = 0; i < _nodes.Length; i++)
+        int[] order = new int[_nodes.Length];
+        for (int i = 0; i < order.Length; i++)
         {
-            for (int j = i + 1; j < _nodes.Length; j++)
+            order[i] = i;
+        }
+
+        Array.Sort(order, ComparePriority);
+
+        bool[] admitted = new bool[_nodes.Length];
+        int[] roots = new int[_nodes.Length];
+        float[] rootDistance = new float[_nodes.Length];
+        foreach (int s in order)
+        {
+            int rootCount = CollectLinkedRoots(s, linkSlack, parent, admitted, roots, rootDistance);
+            int accepted = AcceptRoots(s, parent, admitted, roots, rootCount);
+
+            if (rootCount > 0 && accepted == 0)
             {
-                if (AreLinked(_nodes[i], _nodes[j], linkSlack))
-                {
-                    parent[Find(parent, i)] = Find(parent, j);
-                }
+                _duplicate[s] = true;
+                continue;
+            }
+
+            admitted[s] = true;
+            for (int r = 0; r < accepted; r++)
+            {
+                parent[roots[r]] = s;
             }
         }
 
@@ -298,6 +371,104 @@ internal sealed class StationGraph
         }
 
         return clusters;
+    }
+
+    /// <summary>Lists the clusters station s links to, nearest first, and returns how many.</summary>
+    private int CollectLinkedRoots(int s, float linkSlack, int[] parent, bool[] admitted, int[] roots, float[] rootDistance)
+    {
+        int count = 0;
+        for (int j = 0; j < _nodes.Length; j++)
+        {
+            if (!admitted[j] || !AreLinked(_nodes[s], _nodes[j], linkSlack))
+            {
+                continue;
+            }
+
+            int root = Find(parent, j);
+            float distance = Distance(_nodes[s], _nodes[j]);
+            int at = Array.IndexOf(roots, root, 0, count);
+            if (at >= 0)
+            {
+                rootDistance[at] = Math.Min(rootDistance[at], distance);
+            }
+            else
+            {
+                roots[count] = root;
+                rootDistance[count] = distance;
+                count++;
+            }
+        }
+
+        Array.Sort(rootDistance, roots, 0, count);
+        return count;
+    }
+
+    /// <summary>
+    /// Keeps, in order, the linked clusters that share no type with station s or with the clusters kept before
+    /// them, moving them to the front of roots. Returns how many were kept.
+    /// </summary>
+    private int AcceptRoots(int s, int[] parent, bool[] admitted, int[] roots, int rootCount)
+    {
+        int[] seen = new int[_nodes.Length + 1];
+        seen[0] = _nodes[s].Type;
+        int seenCount = 1;
+        int accepted = 0;
+        for (int r = 0; r < rootCount; r++)
+        {
+            if (TypesConflict(roots[r], parent, admitted, seen, seenCount))
+            {
+                continue;
+            }
+
+            for (int j = 0; j < _nodes.Length; j++)
+            {
+                if (admitted[j] && Find(parent, j) == roots[r])
+                {
+                    seen[seenCount++] = _nodes[j].Type;
+                }
+            }
+
+            roots[accepted++] = roots[r];
+        }
+
+        return accepted;
+    }
+
+    private bool TypesConflict(int root, int[] parent, bool[] admitted, int[] seen, int seenCount)
+    {
+        for (int j = 0; j < _nodes.Length; j++)
+        {
+            if (admitted[j] && Find(parent, j) == root && Array.IndexOf(seen, _nodes[j].Type, 0, seenCount) >= 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private int ComparePriority(int a, int b)
+    {
+        int byRange = _nodes[b].Range.CompareTo(_nodes[a].Range);
+        if (byRange != 0)
+        {
+            return byRange;
+        }
+
+        int byAge = _nodes[a].Order.CompareTo(_nodes[b].Order);
+        if (byAge != 0)
+        {
+            return byAge;
+        }
+
+        int byX = _nodes[a].X.CompareTo(_nodes[b].X);
+        if (byX != 0)
+        {
+            return byX;
+        }
+
+        int byZ = _nodes[a].Z.CompareTo(_nodes[b].Z);
+        return byZ != 0 ? byZ : a.CompareTo(b);
     }
 
     private static int Find(int[] parent, int i)

@@ -91,10 +91,11 @@ internal sealed class BenchLinkCommand : ConsoleCommand
 
             StationNode node = graph[i];
             string inRange = graph.Covers(i, origin.x, origin.z) ? ", you are in range" : string.Empty;
+            string duplicate = graph.IsDuplicate(i) ? ", duplicate type: not linked" : string.Empty;
             context.AddString("  [" + i + "] " + Localization.instance.Localize(stations[i].m_name) +
                 " level " + stations[i].GetLevel() +
                 ", range " + node.Range.ToString("0.#", CultureInfo.InvariantCulture) + " m" +
-                ", " + StationGraph.Distance(node, originNode).ToString("0.#", CultureInfo.InvariantCulture) + " m from you" + inRange);
+                ", " + StationGraph.Distance(node, originNode).ToString("0.#", CultureInfo.InvariantCulture) + " m from you" + inRange + duplicate);
         }
 
         StringBuilder links = new();

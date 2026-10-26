@@ -37,6 +37,7 @@ public class BenchLinkPlugin : BaseUnityPlugin
     private void Update()
     {
         _indicator.Tick(UnityEngine.Time.deltaTime);
+        PlacementNotice.Tick();
     }
 
     private void OnDestroy()
