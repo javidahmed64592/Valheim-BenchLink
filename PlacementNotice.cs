@@ -12,7 +12,7 @@ namespace BenchLink;
 internal static class PlacementNotice
 {
     private const float PlacementWindow = 1f;
-    private const float HoldSeconds = 5f;
+    private const float HoldSeconds = 3f;
     private const float FadeSeconds = 1.5f;
 
     private static float _placedAt = float.NegativeInfinity;
