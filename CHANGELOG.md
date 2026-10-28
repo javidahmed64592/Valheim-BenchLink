@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Updated the BepInExPack_Valheim dependency to 5.4.2360.
+
 ## 0.1.0
 
 - Nearby crafting stations form linked clusters, and any bench's build range counts for every bench type in its cluster.

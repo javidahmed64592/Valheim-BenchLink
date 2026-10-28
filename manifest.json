@@ -1,9 +1,9 @@
 {
   "name": "BenchLink",
   "description": "Link nearby crafting stations into clusters so any bench's range counts for every bench type in the cluster.",
-  "version_number": "0.1.0",
+  "version_number": "0.1.1",
   "dependencies": [
-    "denikson-BepInExPack_Valheim-5.4.2351",
+    "denikson-BepInExPack_Valheim-5.4.2360",
     "ValheimModding-Jotunn-2.30.2"
   ],
   "website_url": "https://github.com/javidahmed64592/Valheim-BenchLink"
