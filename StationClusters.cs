@@ -16,8 +16,14 @@ internal static class StationClusters
     private static readonly Dictionary<string, int> TypeIds = [];
     private static readonly List<CraftingStation> StationList = [];
 
-    private static readonly Dictionary<int, bool> WasDuplicate = [];
+    private const float SettleTime = 3f;
+
+    /// <summary>The last settled duplicate state of each station seen, kept while the station is unloaded.</summary>
+    private static readonly Dictionary<ZDOID, bool> Announced = [];
     private static readonly List<string> ChangedNames = [];
+
+    private static Dictionary<ZDOID, bool> _snapshot = [];
+    private static float _stableSince;
 
     private static StationGraph _graph;
     private static float _builtAt;
@@ -165,25 +171,70 @@ internal static class StationClusters
     private static void RecordChanges()
     {
         Player player = Player.m_localPlayer;
+
+        // Zones streaming in or out (after a portal, say) change which stations are loaded, and the clusters
+        // wobble until they have all arrived. Only a state that has held still for a while counts, and it is
+        // compared with the last state announced, so a wobble that ends where it began is never reported.
+        Dictionary<ZDOID, bool> current = [];
         for (int i = 0; i < StationList.Count; i++)
         {
-            bool duplicate = _graph.IsDuplicate(i);
-            if (player != null && WasDuplicate.TryGetValue(StationList[i].GetInstanceID(), out bool was) && was != duplicate)
+            ZNetView view = StationList[i].GetComponent<ZNetView>();
+            if (view != null && view.IsValid())
             {
-                Vector3 position = player.transform.position;
-                string name = StationList[i].m_name;
-                if (_graph.Covers(i, position.x, position.z) && !ChangedNames.Contains(name))
-                {
-                    ChangedNames.Add(name);
-                }
+                current[view.GetZDO().m_uid] = _graph.IsDuplicate(i);
             }
         }
 
-        WasDuplicate.Clear();
+        if (player == null || player.IsTeleporting() || !SameState(current, _snapshot))
+        {
+            _snapshot = current;
+            _stableSince = Time.time;
+            return;
+        }
+
+        if (Time.time - _stableSince < SettleTime)
+        {
+            return;
+        }
+
+        Vector3 position = player.transform.position;
         for (int i = 0; i < StationList.Count; i++)
         {
-            WasDuplicate[StationList[i].GetInstanceID()] = _graph.IsDuplicate(i);
+            ZNetView view = StationList[i].GetComponent<ZNetView>();
+            if (view == null || !view.IsValid())
+            {
+                continue;
+            }
+
+            ZDOID id = view.GetZDO().m_uid;
+            bool duplicate = _graph.IsDuplicate(i);
+            string name = StationList[i].m_name;
+            if (Announced.TryGetValue(id, out bool was) && was != duplicate
+                && _graph.Covers(i, position.x, position.z) && !ChangedNames.Contains(name))
+            {
+                ChangedNames.Add(name);
+            }
+
+            Announced[id] = duplicate;
         }
+    }
+
+    private static bool SameState(Dictionary<ZDOID, bool> a, Dictionary<ZDOID, bool> b)
+    {
+        if (a.Count != b.Count)
+        {
+            return false;
+        }
+
+        foreach (KeyValuePair<ZDOID, bool> entry in a)
+        {
+            if (!b.TryGetValue(entry.Key, out bool other) || other != entry.Value)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /// <summary>Stations get ever-increasing ids as they are built, so a lower one was built earlier.</summary>

@@ -3,6 +3,7 @@
 ## 0.1.1
 
 - Updated the BepInExPack_Valheim dependency to 5.4.2360.
+- Fixed the "cluster bench changed" message appearing after going through a portal. Changes are now only reported once the loaded stations have settled and differ from the last settled state.
 
 ## 0.1.0
 
