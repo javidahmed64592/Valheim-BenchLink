@@ -7,31 +7,25 @@
 Link nearby crafting stations into clusters so one of each bench covers your whole base.
 Inside a cluster, every bench's build range counts for every bench type in it.
 
-![Workbench and Forge](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_1.png)
-![Stonecutter](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_2.png)
+![Linked Stations](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_1.png)
 
 ## How It Works
 
 Two stations link when they are closer than the larger of their build ranges, and links chain into clusters.
 Build anywhere inside the range of **any** station in a cluster to use every station type in it.
-
 A cluster holds **one station of each type**, so extra benches cannot be chained outwards.
-A second bench of a type is not linked and works like vanilla, and you get a message when you place one.
-The more upgraded bench keeps the cluster's slot, and on a tie the one built first does.
-You get a message whenever the cluster's bench changes.
-
-## Range Indicator
-
 With the Hammer out, the rings of nearby benches are shown: gold if linked, white if not.
-Look at a bench to turn its own ring blue.
+Rings lie on the floor around a bench, so they show on raised floors and platforms.
+
+## Finding Your Benches
+
+Press **Shift+E** on any station to light up every station in its cluster for a few seconds.
+
+![Cluster Highlight](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_2.png)
 
 ## Configuration
 
 Settings are in the BepInEx config file `javidahmed64592.benchlink.cfg`.
-You can add extra metres to the link distance (`LinkSlack`) and turn the ring indicator off (`Indicator`).
-
-The `benchlink` console command lists nearby clusters.
-Only loaded stations count, and BenchLink only needs to be installed on your own game.
 
 ## License
 
