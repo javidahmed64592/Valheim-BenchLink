@@ -15,7 +15,7 @@ public class BenchLinkPlugin : BaseUnityPlugin
 {
     public const string PluginGUID = "javidahmed64592.benchlink";
     public const string PluginName = "Bench Link";
-    public const string PluginVersion = "0.1.1";
+    public const string PluginVersion = "0.2.0";
 
     internal static BepInEx.Logging.ManualLogSource Log { get; private set; }
 
@@ -38,11 +38,13 @@ public class BenchLinkPlugin : BaseUnityPlugin
     {
         _indicator.Tick(UnityEngine.Time.deltaTime);
         PlacementNotice.Tick();
+        ClusterHighlight.Tick();
     }
 
     private void OnDestroy()
     {
         _indicator.Hide();
+        ClusterHighlight.Stop();
         _harmony?.UnpatchSelf();
     }
 }
@@ -57,6 +59,7 @@ internal static class BenchLinkConfig
 {
     public static ConfigEntry<float> LinkSlack;
     public static ConfigEntry<IndicatorMode> Indicator;
+    public static ConfigEntry<float> HighlightDuration;
 
     public static void Bind(ConfigFile config)
     {
@@ -66,5 +69,9 @@ internal static class BenchLinkConfig
                 new AcceptableValueRange<float>(0f, 20f)));
         Indicator = config.Bind("Look", "Indicator", IndicatorMode.WhileBuilding,
             "Show the build range of every linked station while the hammer is out. Off removes it.");
+        HighlightDuration = config.Bind("Look", "HighlightDuration", 3f,
+            new ConfigDescription("Seconds that Shift+E on a station lights up every station in its cluster, " +
+                "with a glow and a marker through walls.",
+                new AcceptableValueRange<float>(0.5f, 60f)));
     }
 }

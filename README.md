@@ -25,10 +25,16 @@ You get a message whenever the cluster's bench changes.
 With the Hammer out, the rings of nearby benches are shown: gold if linked, white if not.
 Look at a bench to turn its own ring blue.
 
+## Finding Your Benches
+
+Press **Shift+E** on any station to light up every station in its cluster for a few seconds.
+Each one glows gold and gets a marker with its name and distance, which shows through walls.
+Markers cling to the edge of the screen when a station is off to the side or behind you.
+
 ## Configuration
 
 Settings are in the BepInEx config file `javidahmed64592.benchlink.cfg`.
-You can add extra metres to the link distance (`LinkSlack`) and turn the ring indicator off (`Indicator`).
+You can add extra metres to the link distance (`LinkSlack`), turn the ring indicator off (`Indicator`) and set how long Shift+E lights up a cluster (`HighlightDuration`, 3 seconds by default).
 
 The `benchlink` console command lists nearby clusters.
 Only loaded stations count, and BenchLink only needs to be installed on your own game.
