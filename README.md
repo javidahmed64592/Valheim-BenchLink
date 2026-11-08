@@ -7,8 +7,7 @@
 Link nearby crafting stations into clusters so one of each bench covers your whole base.
 Inside a cluster, every bench's build range counts for every bench type in it.
 
-![Workbench and Forge](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_1.png)
-![Stonecutter](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_2.png)
+![Linked Stations](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_1.png)
 
 ## How It Works
 
@@ -22,7 +21,7 @@ Rings lie on the floor around a bench, so they show on raised floors and platfor
 
 Press **Shift+E** on any station to light up every station in its cluster for a few seconds.
 
-![Cluster Highlight](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_3.png)
+![Cluster Highlight](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_2.png)
 
 ## Configuration
 
