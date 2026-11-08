@@ -32,7 +32,7 @@ Settings marked "(Synced with server)" use the server's values when the server h
 ## Compatibility
 
 - Other mods that change crafting station build range, or which station a piece needs, may conflict with how clusters extend the range.
-- [HomeBubble](https://github.com/javidahmed64592/Valheim-HomeBubble) counts stations that a cluster brings into range.
+- [HomeBubble](https://thunderstore.io/c/valheim/p/Aestelwen/HomeBubble/) counts stations that a cluster brings into range.
 - This mod has not been tested with a gamepad, only with keyboard and mouse.
 
 ## Uninstalling
