@@ -27,7 +27,7 @@ jobs:
           dotnet-version: 10.0.x
       - run: dotnet test tests/BenchLink.Tests.csproj
 
-  version-check:
+  dotnet-version-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
