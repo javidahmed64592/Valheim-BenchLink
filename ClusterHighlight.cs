@@ -55,11 +55,11 @@ internal static class ClusterHighlight
     {
         if (Lit.Count > 1)
         {
-            return "Showing " + Lit.Count + " linked stations";
+            return Localization.instance.Localize("$benchlink_showing", Lit.Count.ToString(System.Globalization.CultureInfo.InvariantCulture));
         }
 
         string name = Localization.instance.Localize(station.m_name);
-        return duplicate ? "Duplicate " + name + ": not linked to a cluster" : name + " is not linked to any other station";
+        return Localization.instance.Localize(duplicate ? "$benchlink_duplicate_unlinked" : "$benchlink_alone", name);
     }
 
     public static void Tick()
@@ -174,7 +174,7 @@ internal static class StationHoverTextPatch
         Player player = Player.m_localPlayer;
         if (player != null && __instance.InUseDistance(player))
         {
-            __result += Localization.instance.Localize("\n[<color=yellow><b>$KEY_AltPlace + $KEY_Use</b></color>] Show linked stations");
+            __result += Localization.instance.Localize("\n[<color=yellow><b>$KEY_AltPlace + $KEY_Use</b></color>] $benchlink_show_linked");
         }
     }
 }

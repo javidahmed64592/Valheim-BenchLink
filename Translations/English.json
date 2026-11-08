@@ -1,0 +1,8 @@
+{
+  "benchlink_showing": "Showing $1 linked stations",
+  "benchlink_duplicate_unlinked": "Duplicate $1: not linked to a cluster",
+  "benchlink_alone": "$1 is not linked to any other station",
+  "benchlink_show_linked": "Show linked stations",
+  "benchlink_cluster_changed": "Cluster $1 changed!",
+  "benchlink_duplicate_placed": "Duplicate $1: it won't extend the cluster"
+}

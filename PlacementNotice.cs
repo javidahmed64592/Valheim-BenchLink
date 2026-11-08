@@ -27,7 +27,7 @@ internal static class PlacementNotice
 
         if (StationClusters.TryTakeChanged(out string changed))
         {
-            Show("Cluster " + Localization.instance.Localize(changed) + " changed!");
+            Show(Localization.instance.Localize("$benchlink_cluster_changed", Localization.instance.Localize(changed)));
         }
 
         if (_justPlaced == null)
@@ -45,7 +45,7 @@ internal static class PlacementNotice
             return;
         }
 
-        Show("Duplicate " + Localization.instance.Localize(station.m_name) + ": it won't extend the cluster");
+        Show(Localization.instance.Localize("$benchlink_duplicate_placed", Localization.instance.Localize(station.m_name)));
     }
 
     /// <summary>

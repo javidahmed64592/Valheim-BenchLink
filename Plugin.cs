@@ -15,7 +15,7 @@ public class BenchLinkPlugin : BaseUnityPlugin
 {
     public const string PluginGUID = "javidahmed64592.benchlink";
     public const string PluginName = "Bench Link";
-    public const string PluginVersion = "0.2.0";
+    public const string PluginVersion = "0.3.0";
 
     internal static BepInEx.Logging.ManualLogSource Log { get; private set; }
 
@@ -27,6 +27,7 @@ public class BenchLinkPlugin : BaseUnityPlugin
     {
         Log = Logger;
         BenchLinkConfig.Bind(Config);
+        Translations.Load();
 
         _harmony = new Harmony(PluginGUID);
         _harmony.PatchAll();
@@ -65,8 +66,9 @@ internal static class BenchLinkConfig
     {
         LinkSlack = config.Bind("General", "LinkSlack", 0f,
             new ConfigDescription("Extra metres added when deciding whether two stations are linked. " +
-                "Stations are linked when they are closer than the larger of their two build ranges plus this.",
-                new AcceptableValueRange<float>(0f, 20f)));
+                "Stations are linked when they are closer than the larger of their two build ranges plus this. (Synced with server)",
+                new AcceptableValueRange<float>(0f, 20f),
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
         Indicator = config.Bind("Look", "Indicator", IndicatorMode.WhileBuilding,
             "Show the build range of every linked station while the hammer is out. Off removes it.");
         HighlightDuration = config.Bind("Look", "HighlightDuration", 3f,
