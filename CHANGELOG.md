@@ -6,6 +6,7 @@
 - Messages and hover text can now be translated (`Translations/English.json`).
 - The README now says that only loaded stations link.
 - Added a CI check that the version matches in every file.
+- Moved `package.sh` into `.github/scripts` and made it the same for every mod: the name, version and DLL now come from `manifest.json` and the `.csproj`.
 
 ## 0.2.0
 
