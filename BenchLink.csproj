@@ -4,7 +4,7 @@
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>BenchLink</AssemblyName>
     <Description>Link nearby crafting stations into clusters so any bench's range counts for every bench type in the cluster.</Description>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <LangVersion>latest</LangVersion>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
@@ -24,6 +24,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <!-- Translations/<Language>.json, embedded and loaded by Translations.Load. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Translations\*.json" LogicalName="BenchLink.Translations.%(Filename).json" />
   </ItemGroup>
 
   <!-- In CI (GitHub Actions) there is no local Valheim install, so game/BepInEx DLLs

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+- `LinkSlack` is now synced from the server when it has the mod, so every player links benches the same way.
+- Messages and hover text can now be translated (`Translations/English.json`).
+- The README now says that only loaded stations link.
+- Added a CI check that the version matches in every file.
+- Moved `package.sh` into `.github/scripts` and made it the same for every mod: the name, version and DLL now come from `manifest.json` and the `.csproj`.
+
 ## 0.2.0
 
 - Press **Shift+E** on any station to light up every station in its cluster, so you can find them. Each one glows gold and gets a marker on screen with its name and distance, through walls, clinging to the edge of the screen when the station is off to the side or behind you. A message says how many stations are linked, or that the station is a duplicate or on its own. Only you see it.
