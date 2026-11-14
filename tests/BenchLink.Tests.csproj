@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <!-- The link maths has no Unity dependency, so it compiles straight into the tests. -->
-    <Compile Include="../StationGraph.cs" Link="StationGraph.cs" />
+    <Compile Include="../Clusters/StationGraph.cs" Link="StationGraph.cs" />
   </ItemGroup>
 
 </Project>

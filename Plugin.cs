@@ -1,3 +1,6 @@
+using BenchLink.Core;
+using BenchLink.UI;
+
 using BepInEx;
 using BepInEx.Configuration;
 

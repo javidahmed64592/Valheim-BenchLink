@@ -2,11 +2,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
+using BenchLink.Clusters;
+
 using Jotunn.Entities;
 
 using UnityEngine;
 
-namespace BenchLink;
+namespace BenchLink.Core;
 
 /// <summary>Debugging aid: prints the station clusters near the player.</summary>
 internal sealed class BenchLinkCommand : ConsoleCommand

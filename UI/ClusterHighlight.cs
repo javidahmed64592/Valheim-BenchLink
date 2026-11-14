@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 
-using HarmonyLib;
+using BenchLink.Clusters;
 
 using UnityEngine;
 
-namespace BenchLink;
+namespace BenchLink.UI;
 
 /// <summary>
 /// Lights up every station in a cluster for a few seconds so the player can find them: each glows Ember Gold and
@@ -142,39 +142,5 @@ internal static class ClusterHighlight
         }
 
         return top + 0.4f;
-    }
-}
-
-/// <summary>Shift+E on a station highlights its cluster instead of opening the crafting menu.</summary>
-[HarmonyPatch(typeof(CraftingStation), nameof(CraftingStation.Interact))]
-internal static class StationInteractPatch
-{
-    private static bool Prefix(CraftingStation __instance, Humanoid user, bool repeat, bool alt, ref bool __result)
-    {
-        if (!alt)
-        {
-            return true;
-        }
-
-        __result = false;
-        if (!repeat && user == Player.m_localPlayer && user is Player player)
-        {
-            ClusterHighlight.Show(__instance, player);
-        }
-
-        return false;
-    }
-}
-
-[HarmonyPatch(typeof(CraftingStation), nameof(CraftingStation.GetHoverText))]
-internal static class StationHoverTextPatch
-{
-    private static void Postfix(CraftingStation __instance, ref string __result)
-    {
-        Player player = Player.m_localPlayer;
-        if (player != null && __instance.InUseDistance(player))
-        {
-            __result += Localization.instance.Localize("\n[<color=yellow><b>$KEY_AltPlace + $KEY_Use</b></color>] $benchlink_show_linked");
-        }
     }
 }

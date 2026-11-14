@@ -1,3 +1,5 @@
+using BenchLink.Clusters;
+
 using Xunit;
 
 namespace BenchLink.Tests;

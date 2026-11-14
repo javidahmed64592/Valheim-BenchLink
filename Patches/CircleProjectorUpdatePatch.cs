@@ -2,7 +2,7 @@ using HarmonyLib;
 
 using UnityEngine;
 
-namespace BenchLink;
+namespace BenchLink.Patches;
 
 /// <summary>
 /// <para>
@@ -19,7 +19,7 @@ namespace BenchLink;
 /// </para>
 /// </summary>
 [HarmonyPatch(typeof(CircleProjector), "Update")]
-internal static class FloorRings
+internal static class CircleProjector_Update_Patch
 {
     /// <summary>
     /// How far above the station the downward cast starts. Below a roof or an upper floor, and below the top of a

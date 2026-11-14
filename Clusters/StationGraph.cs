@@ -1,6 +1,6 @@
 using System;
 
-namespace BenchLink;
+namespace BenchLink.Clusters;
 
 /// <summary>A crafting station reduced to what the link maths needs, with no Unity types.</summary>
 internal readonly struct StationNode(float x, float z, float range, int type, long order = 0)

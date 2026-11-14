@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BenchLink;
+namespace BenchLink.UI;
 
 /// <summary>
 /// A gold arrow and label on the HUD that sit over a station wherever it is, walls or not. When the station is off

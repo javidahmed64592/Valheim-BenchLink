@@ -1,8 +1,8 @@
-using HarmonyLib;
+using BenchLink.Clusters;
 
 using UnityEngine;
 
-namespace BenchLink;
+namespace BenchLink.UI;
 
 /// <summary>
 /// Tells the player when a station they have just built repeats a type in the cluster it stands in,
@@ -104,14 +104,5 @@ internal static class PlacementNotice
             _placedAt = float.NegativeInfinity;
             _justPlaced = station;
         }
-    }
-}
-
-[HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
-internal static class PlacePiecePatch
-{
-    private static void Postfix(Piece piece)
-    {
-        PlacementNotice.Placed(piece);
     }
 }
