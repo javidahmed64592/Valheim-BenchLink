@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 
+using BenchLink.Clusters;
+
 using UnityEngine;
 
-namespace BenchLink;
+namespace BenchLink.UI;
 
 /// <summary>
 /// While building, shows the game's own bench rings for every station in the cluster of each bench

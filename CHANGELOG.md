@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Moved the source files into folders (`Core`, `Clusters`, `UI`, `Patches`), leaving only `Plugin.cs` at the root, with each Harmony patch in its own file under `Patches`. No behaviour change.
+
 ## 0.3.0
 
 - `LinkSlack` is now synced from the server when it has the mod, so every player links benches the same way.

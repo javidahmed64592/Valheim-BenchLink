@@ -1,8 +1,10 @@
+using BenchLink.Clusters;
+
 using HarmonyLib;
 
 using UnityEngine;
 
-namespace BenchLink;
+namespace BenchLink.Patches;
 
 /// <summary>
 /// Every build-range check for a piece's required station (placing, removing and the hammer menu's
@@ -11,7 +13,7 @@ namespace BenchLink;
 /// linked station of that type is also in range (the hammer menu highlights the station returned).
 /// </summary>
 [HarmonyPatch(typeof(CraftingStation), nameof(CraftingStation.HaveBuildStationInRange))]
-internal static class HaveBuildStationInRangePatch
+internal static class CraftingStation_HaveBuildStationInRange_Patch
 {
     private static void Postfix(string name, Vector3 point, ref CraftingStation __result)
     {
@@ -22,25 +24,5 @@ internal static class HaveBuildStationInRangePatch
         }
 
         __result = StationClusters.FindLinked(name, point);
-    }
-}
-
-/// <summary>Stations register themselves in Start, so the clusters change when one starts.</summary>
-[HarmonyPatch(typeof(CraftingStation), "Start")]
-internal static class StationStartPatch
-{
-    private static void Postfix(CraftingStation __instance)
-    {
-        StationClusters.Invalidate();
-        PlacementNotice.Started(__instance);
-    }
-}
-
-[HarmonyPatch(typeof(CraftingStation), "OnDestroy")]
-internal static class StationDestroyPatch
-{
-    private static void Postfix()
-    {
-        StationClusters.Invalidate();
     }
 }

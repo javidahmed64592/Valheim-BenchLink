@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-namespace BenchLink;
+namespace BenchLink.Clusters;
 
 /// <summary>
 /// Builds the link graph over the loaded crafting stations and caches it. The cache is rebuilt when a station
