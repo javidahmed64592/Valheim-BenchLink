@@ -24,6 +24,11 @@ Press **Shift+E** on any station to light up every station in its cluster for a 
 
 ![Cluster Highlight](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_2.png)
 
+## Coverage on the Map
+
+Open the large map to see the area each cluster covers: gold for linked clusters, white for stations on their own.
+Only stations loaded around you are shown.
+
 ## Configuration
 
 Settings are in the BepInEx config file `javidahmed64592.benchlink.cfg`.

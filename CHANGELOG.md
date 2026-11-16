@@ -1,7 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.4.0
 
+- The large map shades the area each loaded cluster covers: gold for linked clusters, white for stations on their own, with a brighter edge. It sits under the pins and pans and zooms with the map. Turn it off with the new `MapCoverage` setting under `[Look]`.
 - Moved the source files into folders (`Core`, `Clusters`, `UI`, `Patches`), leaving only `Plugin.cs` at the root, with each Harmony patch in its own file under `Patches`. No behaviour change.
 
 ## 0.3.0
