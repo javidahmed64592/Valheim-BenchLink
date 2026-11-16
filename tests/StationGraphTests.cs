@@ -237,4 +237,19 @@ public class StationGraphTests
         Assert.Equal(forward.IsDuplicate(2), backward.IsDuplicate(0));
         Assert.Equal(forward.IsDuplicate(0), backward.IsDuplicate(2));
     }
+
+    [Fact]
+    public void CoverageMaskFollowsTheClusterBounds()
+    {
+        var graph = new StationGraph([Station(0, 10, Workbench), Station(15, 10, Forge)], 6f);
+
+        (float minX, float minZ, float maxX, float maxZ) = graph.ClusterBounds(0);
+        Assert.Equal((-10f, -10f, 25f, 10f), (minX, minZ, maxX, maxZ));
+
+        bool[] mask = graph.CoverageMask(0, minX, minZ, 1f, 35, 20);
+        Assert.True(mask[(10 * 35) + 10]);   // Under the workbench.
+        Assert.True(mask[(10 * 35) + 17]);   // Between the two.
+        Assert.False(mask[0]);               // The corner is outside both circles.
+        Assert.False(mask[(19 * 35) + 34]);
+    }
 }

@@ -200,22 +200,7 @@ internal sealed class StationGraph
     /// </summary>
     public (double vanilla, double linked) EstimateAreas(int cluster, int maxCells)
     {
-        float minX = float.MaxValue;
-        float maxX = float.MinValue;
-        float minZ = float.MaxValue;
-        float maxZ = float.MinValue;
-        for (int i = 0; i < _nodes.Length; i++)
-        {
-            if (_cluster[i] != cluster)
-            {
-                continue;
-            }
-
-            minX = Math.Min(minX, _nodes[i].X - _nodes[i].Range);
-            maxX = Math.Max(maxX, _nodes[i].X + _nodes[i].Range);
-            minZ = Math.Min(minZ, _nodes[i].Z - _nodes[i].Range);
-            maxZ = Math.Max(maxZ, _nodes[i].Z + _nodes[i].Range);
-        }
+        (float minX, float minZ, float maxX, float maxZ) = ClusterBounds(cluster);
 
         float cellSize = 1f;
         while ((maxX - minX) / cellSize * ((maxZ - minZ) / cellSize) > maxCells)
@@ -245,6 +230,49 @@ internal sealed class StationGraph
 
         double cellArea = (double)cellSize * cellSize;
         return (vanillaCells * cellArea, linkedCells * cellArea);
+    }
+
+    /// <summary>The smallest box, on the horizontal plane, that holds every station range in the cluster.</summary>
+    public (float minX, float minZ, float maxX, float maxZ) ClusterBounds(int cluster)
+    {
+        float minX = float.MaxValue;
+        float maxX = float.MinValue;
+        float minZ = float.MaxValue;
+        float maxZ = float.MinValue;
+        for (int i = 0; i < _nodes.Length; i++)
+        {
+            if (_cluster[i] != cluster)
+            {
+                continue;
+            }
+
+            minX = Math.Min(minX, _nodes[i].X - _nodes[i].Range);
+            maxX = Math.Max(maxX, _nodes[i].X + _nodes[i].Range);
+            minZ = Math.Min(minZ, _nodes[i].Z - _nodes[i].Range);
+            maxZ = Math.Max(maxZ, _nodes[i].Z + _nodes[i].Range);
+        }
+
+        return (minX, minZ, maxX, maxZ);
+    }
+
+    /// <summary>
+    /// Samples which cells of a grid any station in the cluster covers. Cell (column, row) is centred on
+    /// x = minX + (column + 0.5) * cellSize and z = minZ + (row + 0.5) * cellSize, and is stored at
+    /// row * width + column.
+    /// </summary>
+    public bool[] CoverageMask(int cluster, float minX, float minZ, float cellSize, int width, int height)
+    {
+        bool[] mask = new bool[width * height];
+        for (int row = 0; row < height; row++)
+        {
+            float z = minZ + ((row + 0.5f) * cellSize);
+            for (int column = 0; column < width; column++)
+            {
+                mask[(row * width) + column] = ClusterCovers(cluster, minX + ((column + 0.5f) * cellSize), z);
+            }
+        }
+
+        return mask;
     }
 
     /// <summary>Area of the overlap of two circles of radii r1 and r2 whose centres are d apart.</summary>

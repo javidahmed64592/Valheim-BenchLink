@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 
 using BenchLink.Clusters;
 
@@ -8,7 +9,7 @@ namespace BenchLink.UI;
 
 /// <summary>
 /// Lights up every station in a cluster for a few seconds so the player can find them: each glows Ember Gold and
-/// gets a marker on the HUD, through walls, with its name and distance. Started with Shift+E on any station in the
+/// gets a marker on the HUD, through walls, with its name, upgrade level and distance. Started with Shift+E on any station in the
 /// cluster. Only the player who asked sees it.
 /// </summary>
 internal static class ClusterHighlight
@@ -20,6 +21,8 @@ internal static class ClusterHighlight
 
     private static readonly List<CraftingStation> Lit = [];
     private static readonly List<float> Heights = [];
+    private static readonly List<string> Levels = [];
+    private static readonly Dictionary<string, int> MaxLevels = [];
     private static readonly List<StationMarker> Markers = [];
 
     private static float _until;
@@ -43,6 +46,7 @@ internal static class ClusterHighlight
             {
                 Lit.Add(stations[i]);
                 Heights.Add(HeightOf(stations[i]));
+                Levels.Add(LevelOf(stations[i]));
             }
         }
 
@@ -55,7 +59,7 @@ internal static class ClusterHighlight
     {
         if (Lit.Count > 1)
         {
-            return Localization.instance.Localize("$benchlink_showing", Lit.Count.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            return Localization.instance.Localize("$benchlink_showing", Lit.Count.ToString(CultureInfo.InvariantCulture));
         }
 
         string name = Localization.instance.Localize(station.m_name);
@@ -93,7 +97,7 @@ internal static class ClusterHighlight
 
             Vector3 position = station.transform.position;
             Vector3 above = new(position.x, Heights[i], position.z);
-            marker.Show(camera, above, Localization.instance.Localize(station.m_name), Vector3.Distance(from, position));
+            marker.Show(camera, above, Localization.instance.Localize(station.m_name), Levels[i], Vector3.Distance(from, position));
         }
     }
 
@@ -117,6 +121,7 @@ internal static class ClusterHighlight
 
         Lit.Clear();
         Heights.Clear();
+        Levels.Clear();
     }
 
     private static StationMarker MarkerAt(int index)
@@ -127,6 +132,55 @@ internal static class ClusterHighlight
         }
 
         return Markers[index];
+    }
+
+    /// <summary>"Level 3/5", or just "Level 3" when the highest level is not known.</summary>
+    private static string LevelOf(CraftingStation station)
+    {
+        string level = station.GetLevel().ToString(CultureInfo.InvariantCulture);
+        int max = MaxLevelOf(station.m_name);
+        return max > 0
+            ? Localization.instance.Localize("$benchlink_level_of", level, max.ToString(CultureInfo.InvariantCulture))
+            : Localization.instance.Localize("$benchlink_level", level);
+    }
+
+    /// <summary>
+    /// One more than the number of upgrade types the game has for the station, found from the prefabs once per
+    /// station type, so upgrades added by other mods count too. 0 if any of them stack, as there is then no limit.
+    /// </summary>
+    private static int MaxLevelOf(string name)
+    {
+        if (MaxLevels.TryGetValue(name, out int max))
+        {
+            return max;
+        }
+
+        ZNetScene scene = ZNetScene.instance;
+        if (scene == null)
+        {
+            return 0;
+        }
+
+        max = 1;
+        foreach (GameObject prefab in scene.m_prefabs)
+        {
+            StationExtension extension = prefab != null ? prefab.GetComponent<StationExtension>() : null;
+            if (extension == null || extension.m_craftingStation == null || extension.m_craftingStation.m_name != name)
+            {
+                continue;
+            }
+
+            if (extension.m_stack)
+            {
+                max = 0;
+                break;
+            }
+
+            max++;
+        }
+
+        MaxLevels[name] = max;
+        return max;
     }
 
     /// <summary>Just above the top of the station's model, where its marker floats.</summary>

@@ -18,7 +18,7 @@ public class BenchLinkPlugin : BaseUnityPlugin
 {
     public const string PluginGUID = "javidahmed64592.benchlink";
     public const string PluginName = "Bench Link";
-    public const string PluginVersion = "0.3.0";
+    public const string PluginVersion = "0.4.0";
 
     internal static BepInEx.Logging.ManualLogSource Log { get; private set; }
 
@@ -43,12 +43,14 @@ public class BenchLinkPlugin : BaseUnityPlugin
         _indicator.Tick(UnityEngine.Time.deltaTime);
         PlacementNotice.Tick();
         ClusterHighlight.Tick();
+        CoverageMap.Tick();
     }
 
     private void OnDestroy()
     {
         _indicator.Hide();
         ClusterHighlight.Stop();
+        CoverageMap.Destroy();
         _harmony?.UnpatchSelf();
     }
 }
@@ -64,6 +66,7 @@ internal static class BenchLinkConfig
     public static ConfigEntry<float> LinkSlack;
     public static ConfigEntry<IndicatorMode> Indicator;
     public static ConfigEntry<float> HighlightDuration;
+    public static ConfigEntry<bool> MapCoverage;
 
     public static void Bind(ConfigFile config)
     {
@@ -78,5 +81,8 @@ internal static class BenchLinkConfig
             new ConfigDescription("Seconds that Shift+E on a station lights up every station in its cluster, " +
                 "with a glow and a marker through walls.",
                 new AcceptableValueRange<float>(0.5f, 60f)));
+        MapCoverage = config.Bind("Look", "MapCoverage", true,
+            "Shade the area each loaded cluster covers on the minimap and the large map: gold for linked clusters, " +
+            "white for stations on their own.");
     }
 }

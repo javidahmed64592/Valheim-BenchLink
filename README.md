@@ -7,7 +7,7 @@
 Link nearby crafting stations into clusters so one of each bench covers your whole base.
 Inside a cluster, every bench's build range counts for every bench type in it.
 
-![Linked Stations](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_1.png)
+![Linked Stations](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/linked_stations.png)
 
 ## How It Works
 
@@ -21,8 +21,15 @@ Only stations that are loaded around you link, so in a very large base a cluster
 ## Finding Your Benches
 
 Press **Shift+E** on any station to light up every station in its cluster for a few seconds.
+Each one gets a marker with its name, upgrade level and distance.
 
-![Cluster Highlight](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_2.png)
+![Cluster Highlight](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/cluster_highlight.png)
+
+## Coverage on the Map
+
+The minimap and the large map show the area each cluster covers: gold for linked clusters, white for stations on their own.
+
+![Coverage Map](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/coverage_map.png)
 
 ## Configuration
 
