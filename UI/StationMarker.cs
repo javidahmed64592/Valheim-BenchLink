@@ -6,9 +6,9 @@ using UnityEngine.UI;
 namespace BenchLink.UI;
 
 /// <summary>
-/// A gold arrow and label on the HUD that sit over a station wherever it is, walls or not. When the station is off
-/// screen (or behind the player) the marker clings to the edge of the screen and points the way to turn. It hides
-/// along with the rest of the HUD.
+/// A gold arrow and label (name, upgrade level and distance) on the HUD that sit over a station wherever it is, walls
+/// or not. When the station is off screen (or behind the player) the marker clings to the edge of the screen and
+/// points the way to turn. It hides along with the rest of the HUD.
 /// </summary>
 internal sealed class StationMarker
 {
@@ -22,7 +22,7 @@ internal sealed class StationMarker
     private TextMeshProUGUI _text;
     private Canvas _canvas;
 
-    public void Show(Camera camera, Vector3 above, string name, float distance)
+    public void Show(Camera camera, Vector3 above, string name, string level, float distance)
     {
         if (!EnsureCreated())
         {
@@ -75,7 +75,7 @@ internal sealed class StationMarker
         }
 
         _root.transform.position = position;
-        _text.text = "<color=#f0b04a>" + name + "</color>\n" + Mathf.RoundToInt(distance) + " m";
+        _text.text = "<color=#f0b04a>" + name + "</color>\n" + level + " \u00B7 " + Mathf.RoundToInt(distance) + " m";
 
         float pulse = Mathf.Lerp(0.75f, 1f, (Mathf.Sin(Time.time * 4f) + 1f) * 0.5f);
         Color gold = ClusterHighlight.Gold;

@@ -21,6 +21,7 @@ Only stations that are loaded around you link, so in a very large base a cluster
 ## Finding Your Benches
 
 Press **Shift+E** on any station to light up every station in its cluster for a few seconds.
+Each one gets a marker with its name, upgrade level and distance.
 
 ![Cluster Highlight](https://github.com/javidahmed64592/Valheim-BenchLink/raw/main/images/game_screenshot_2.png)
 
