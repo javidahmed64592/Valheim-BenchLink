@@ -26,7 +26,7 @@ Press **Shift+E** on any station to light up every station in its cluster for a 
 
 ## Coverage on the Map
 
-Open the large map to see the area each cluster covers: gold for linked clusters, white for stations on their own.
+The minimap and the large map show the area each cluster covers: gold for linked clusters, white for stations on their own.
 Only stations loaded around you are shown.
 
 ## Configuration

@@ -8,9 +8,9 @@ using UnityEngine.UI;
 namespace BenchLink.UI;
 
 /// <summary>
-/// Shades the area each loaded cluster covers on the large map: Ember Gold for linked clusters, white for a station
-/// on its own (or a duplicate), with a brighter edge. Each cluster is one small texture laid over the map image, under
-/// the pins, rebuilt only when the stations change. Only loaded stations are known, so only clusters near the player
+/// Shades the area each loaded cluster covers on the minimap and the large map: Ember Gold for linked clusters, white for a station
+/// on its own (or a duplicate), with a brighter edge. Each cluster is one small texture shared by both maps and laid over
+/// each map image, under the pins, rebuilt only when the stations change. Only loaded stations are known, so only clusters near the player
 /// show.
 /// </summary>
 internal static class CoverageMap
@@ -24,69 +24,97 @@ internal static class CoverageMap
 
     private static readonly List<Overlay> Overlays = [];
 
-    private static RectTransform _root;
+    private static RectTransform _largeRoot;
+    private static RectTransform _smallRoot;
+    private static bool _visible;
     private static int _signature;
     private static float _checkedAt = float.MinValue;
 
     public static void Tick()
     {
         Minimap map = Minimap.instance;
-        if (!BenchLinkConfig.MapCoverage.Value || map == null || map.m_mode != Minimap.MapMode.Large
+        if (!BenchLinkConfig.MapCoverage.Value || map == null || map.m_mode == Minimap.MapMode.None
             || Player.m_localPlayer == null)
         {
             Hide();
             return;
         }
 
-        if (_root == null)
+        bool force = !_visible;
+        if (_largeRoot == null || _smallRoot == null)
         {
-            Create(map.m_mapImageLarge.rectTransform);
+            // The map was rebuilt (a new world), taking the old overlays with it; only their textures are left.
+            Clear();
+            DestroyRoots();
+            _largeRoot = CreateRoot(map.m_mapImageLarge.rectTransform);
+            _smallRoot = CreateRoot(map.m_mapImageSmall.rectTransform);
+            force = true;
         }
 
-        bool opening = !_root.gameObject.activeSelf;
-        if (opening || Time.time - _checkedAt >= RefreshInterval || Time.time < _checkedAt)
+        if (force || Time.time - _checkedAt >= RefreshInterval || Time.time < _checkedAt)
         {
             _checkedAt = Time.time;
-            Refresh(opening);
+            Refresh(force);
         }
 
-        _root.gameObject.SetActive(true);
-        Position(map);
+        bool large = map.m_mode == Minimap.MapMode.Large;
+        _largeRoot.gameObject.SetActive(large);
+        _smallRoot.gameObject.SetActive(!large);
+        _visible = true;
+        Position(map, large);
     }
 
     public static void Hide()
     {
-        if (_root != null)
+        if (_largeRoot != null)
         {
-            _root.gameObject.SetActive(false);
+            _largeRoot.gameObject.SetActive(false);
         }
+
+        if (_smallRoot != null)
+        {
+            _smallRoot.gameObject.SetActive(false);
+        }
+
+        _visible = false;
     }
 
     public static void Destroy()
     {
         Clear();
-        if (_root != null)
-        {
-            Object.Destroy(_root.gameObject);
-        }
-
-        _root = null;
+        DestroyRoots();
+        _visible = false;
     }
 
-    private static void Create(RectTransform mapImage)
+    private static void DestroyRoots()
     {
-        // The map was rebuilt (a new world), taking the old overlays with it; only their textures are left.
-        Clear();
+        if (_largeRoot != null)
+        {
+            Object.Destroy(_largeRoot.gameObject);
+        }
 
+        if (_smallRoot != null)
+        {
+            Object.Destroy(_smallRoot.gameObject);
+        }
+
+        _largeRoot = null;
+        _smallRoot = null;
+    }
+
+    /// <summary>A layer filling the map image and clipped to it, drawn under the image's other children.</summary>
+    private static RectTransform CreateRoot(RectTransform mapImage)
+    {
         GameObject root = new("BenchLinkCoverage", typeof(RectTransform), typeof(RectMask2D));
         root.SetActive(false);
-        _root = (RectTransform)root.transform;
-        _root.SetParent(mapImage, false);
-        _root.SetAsFirstSibling();
-        _root.anchorMin = Vector2.zero;
-        _root.anchorMax = Vector2.one;
-        _root.offsetMin = Vector2.zero;
-        _root.offsetMax = Vector2.zero;
+        RectTransform rect = (RectTransform)root.transform;
+        rect.SetParent(mapImage, false);
+        rect.SetAsFirstSibling();
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+        return rect;
     }
 
     private static void Refresh(bool force)
@@ -142,19 +170,30 @@ internal static class CoverageMap
         texture.SetPixels32(pixels);
         texture.Apply(false, true);
 
+        float worldWidth = width * cellSize;
+        float worldHeight = height * cellSize;
+        return new Overlay(
+            CreateImage(_largeRoot, texture, cluster),
+            CreateImage(_smallRoot, texture, cluster),
+            texture,
+            minX + (worldWidth / 2),
+            minZ + (worldHeight / 2),
+            worldWidth,
+            worldHeight);
+    }
+
+    private static RectTransform CreateImage(RectTransform root, Texture2D texture, int cluster)
+    {
         GameObject image = new("Cluster" + cluster, typeof(RectTransform), typeof(RawImage));
         RectTransform rect = (RectTransform)image.transform;
-        rect.SetParent(_root, false);
+        rect.SetParent(root, false);
         rect.anchorMin = Vector2.zero;
         rect.anchorMax = Vector2.zero;
         rect.pivot = new Vector2(0.5f, 0.5f);
         RawImage raw = image.GetComponent<RawImage>();
         raw.texture = texture;
         raw.raycastTarget = false;
-
-        float worldWidth = width * cellSize;
-        float worldHeight = height * cellSize;
-        return new Overlay(rect, texture, minX + (worldWidth / 2), minZ + (worldHeight / 2), worldWidth, worldHeight);
+        return rect;
     }
 
     /// <summary>A covered cell is on the edge if an uncovered cell, or the end of the grid, is within EdgeCells of it.</summary>
@@ -182,9 +221,9 @@ internal static class CoverageMap
     }
 
     /// <summary>Lays each overlay over the map the same way the game places area pins, so they pan and zoom with it.</summary>
-    private static void Position(Minimap map)
+    private static void Position(Minimap map, bool large)
     {
-        RawImage image = map.m_mapImageLarge;
+        RawImage image = large ? map.m_mapImageLarge : map.m_mapImageSmall;
         Rect uv = image.uvRect;
         Rect rect = image.rectTransform.rect;
         float worldToGui = rect.width / (map.m_pixelSize * map.m_textureSize * uv.width);
@@ -192,10 +231,11 @@ internal static class CoverageMap
         foreach (Overlay overlay in Overlays)
         {
             map.WorldToMapPoint(new Vector3(overlay.CenterX, 0f, overlay.CenterZ), out float mx, out float my);
-            overlay.Rect.anchoredPosition = new Vector2(
+            RectTransform target = large ? overlay.Large : overlay.Small;
+            target.anchoredPosition = new Vector2(
                 (mx - uv.xMin) / uv.width * rect.width,
                 (my - uv.yMin) / uv.height * rect.height);
-            overlay.Rect.sizeDelta = new Vector2(overlay.Width * worldToGui, overlay.Height * worldToGuiY);
+            target.sizeDelta = new Vector2(overlay.Width * worldToGui, overlay.Height * worldToGuiY);
         }
     }
 
@@ -204,9 +244,14 @@ internal static class CoverageMap
         foreach (Overlay overlay in Overlays)
         {
             Object.Destroy(overlay.Texture);
-            if (overlay.Rect != null)
+            if (overlay.Large != null)
             {
-                Object.Destroy(overlay.Rect.gameObject);
+                Object.Destroy(overlay.Large.gameObject);
+            }
+
+            if (overlay.Small != null)
+            {
+                Object.Destroy(overlay.Small.gameObject);
             }
         }
 
@@ -233,9 +278,17 @@ internal static class CoverageMap
         }
     }
 
-    private sealed class Overlay(RectTransform rect, Texture2D texture, float centerX, float centerZ, float width, float height)
+    private sealed class Overlay(
+        RectTransform large,
+        RectTransform small,
+        Texture2D texture,
+        float centerX,
+        float centerZ,
+        float width,
+        float height)
     {
-        public RectTransform Rect { get; } = rect;
+        public RectTransform Large { get; } = large;
+        public RectTransform Small { get; } = small;
         public Texture2D Texture { get; } = texture;
         public float CenterX { get; } = centerX;
         public float CenterZ { get; } = centerZ;

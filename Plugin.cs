@@ -82,7 +82,7 @@ internal static class BenchLinkConfig
                 "with a glow and a marker through walls.",
                 new AcceptableValueRange<float>(0.5f, 60f)));
         MapCoverage = config.Bind("Look", "MapCoverage", true,
-            "Shade the area each loaded cluster covers on the large map: gold for linked clusters, " +
+            "Shade the area each loaded cluster covers on the minimap and the large map: gold for linked clusters, " +
             "white for stations on their own.");
     }
 }
