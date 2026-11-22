@@ -18,7 +18,7 @@ public class BenchLinkPlugin : BaseUnityPlugin
 {
     public const string PluginGUID = "javidahmed64592.benchlink";
     public const string PluginName = "Bench Link";
-    public const string PluginVersion = "0.4.0";
+    public const string PluginVersion = "1.0.0";
 
     internal static BepInEx.Logging.ManualLogSource Log { get; private set; }
 
