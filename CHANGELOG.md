@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0
+
+- First stable release. The features are unchanged from 0.4.0.
+
 ## 0.4.0
 
 - The minimap and the large map shade the area each loaded cluster covers: gold for linked clusters, white for stations on their own, with a brighter edge. It sits under the pins and pans and zooms with the map. Turn it off with the new `MapCoverage` setting under `[Look]`.
