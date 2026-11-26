@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.1
+
+- A workbench (or other station) still being placed no longer counts as a station in range. Before, selecting the workbench with the hammer let you remove pieces with no workbench nearby.
+- No longer logs a warning about a missing LiberationSans SDF font.
+
 ## 1.0.0
 
 - First stable release. The features are unchanged from 0.4.0.
