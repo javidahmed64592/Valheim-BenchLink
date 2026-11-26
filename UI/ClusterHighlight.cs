@@ -14,6 +14,12 @@ namespace BenchLink.UI;
 /// </summary>
 internal static class ClusterHighlight
 {
+    /// <summary>
+    /// Shift+E on a station and its hover hint, so the hint never offers a key that does nothing. Without it, E opens
+    /// the station as in vanilla.
+    /// </summary>
+    public const string Feature = "Cluster highlight";
+
     /// <summary>The same Ember Gold as the linked stations' range rings.</summary>
     internal static readonly Color Gold = new(0.941f, 0.690f, 0.290f);
 

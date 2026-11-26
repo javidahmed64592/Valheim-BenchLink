@@ -35,11 +35,13 @@ The minimap and the large map show the area each cluster covers: gold for linked
 
 Settings are in the BepInEx config file `javidahmed64592.benchlink.cfg`.
 Settings marked "(Synced with server)" use the server's values when the server has the mod installed.
+`DisabledFeatures` under `[Debug]` is for testing: it turns parts of the mod off by name. Leave it empty to play normally.
 
 ## Compatibility
 
 - Other mods that change crafting station build range, or which station a piece needs, may conflict with how clusters extend the range.
 - [HomeBubble](https://thunderstore.io/c/valheim/p/Aestelwen/HomeBubble/) counts stations that a cluster brings into range.
+- If a game update breaks part of the mod, that part turns off on its own and the log says which one; the rest keeps working.
 - This mod has not been tested with a gamepad, only with keyboard and mouse.
 
 ## Uninstalling

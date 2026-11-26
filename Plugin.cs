@@ -33,13 +33,21 @@ public class BenchLinkPlugin : BaseUnityPlugin
         Translations.Load();
 
         _harmony = new Harmony(PluginGUID);
-        _harmony.PatchAll();
+        if (!SafePatcher.PatchAll(_harmony, Config, Logger))
+        {
+            return;
+        }
 
         CommandManager.Instance.AddConsoleCommand(new BenchLinkCommand());
     }
 
     private void Update()
     {
+        if (!SafePatcher.ModEnabled)
+        {
+            return;
+        }
+
         _indicator.Tick(UnityEngine.Time.deltaTime);
         PlacementNotice.Tick();
         ClusterHighlight.Tick();
