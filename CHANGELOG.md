@@ -4,6 +4,7 @@
 
 - If a game update breaks part of the mod, only that part turns off and the rest keeps working: the cluster highlight (Shift+E), the range ring on floors and the duplicate station notice can each turn off while linked stations still extend the build range. The log says which part is off, in one line. If linking itself breaks, the whole mod turns off cleanly instead of throwing errors.
 - New `DisabledFeatures` setting under `[Debug]`, for testing: turns parts of the mod off by name.
+- Updated Jotunn to 2.30.3.
 
 ## 1.0.1
 
