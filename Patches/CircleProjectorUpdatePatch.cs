@@ -1,3 +1,5 @@
+using BenchLink.Core;
+
 using HarmonyLib;
 
 using UnityEngine;
@@ -19,8 +21,12 @@ namespace BenchLink.Patches;
 /// </para>
 /// </summary>
 [HarmonyPatch(typeof(CircleProjector), "Update")]
+[Feature(Feature)]
 internal static class CircleProjector_Update_Patch
 {
+    /// <summary>Without it, the ring is laid on the terrain as in vanilla.</summary>
+    public const string Feature = "Range ring on floors";
+
     /// <summary>
     /// How far above the station the downward cast starts. Below a roof or an upper floor, and below the top of a
     /// two-metre wall: a cast that starts inside a collider passes through it, so walls do not catch the ring.

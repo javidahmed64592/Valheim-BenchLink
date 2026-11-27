@@ -1,8 +1,12 @@
+using BenchLink.Core;
+using BenchLink.UI;
+
 using HarmonyLib;
 
 namespace BenchLink.Patches;
 
 [HarmonyPatch(typeof(CraftingStation), nameof(CraftingStation.GetHoverText))]
+[Feature(ClusterHighlight.Feature)]
 internal static class CraftingStation_GetHoverText_Patch
 {
     private static void Postfix(CraftingStation __instance, ref string __result)
